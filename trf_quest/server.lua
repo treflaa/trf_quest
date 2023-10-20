@@ -18,7 +18,7 @@ vRP.defInventoryItem({trfConfig.itemCod,trfConfig.itemName,trfConfig.itemDescrip
 
 RegisterCommand(trfConfig.comandaQuest,function(source)
   local user_id = vRP.getUserId{source}
-    if quest[user_id] ~= true then
+    if not quest[user_id] then
       local user_id = vRP.getUserId{source}
       bomboane[user_id] = exports.ghmattimysql:scalarSync('SELECT bomboanepack from vrp_users where id = @user_id',{user_id = user_id})
       TriggerClientEvent("trf:quest",source,bomboane[user_id]*100/trfConfig.bombaneMax,true)
@@ -31,7 +31,7 @@ RegisterCommand(trfConfig.comandaQuest,function(source)
 end)
 RegisterCommand(trfConfig.comandaPack,function(source)
     local user_id = vRP.getUserId{source}
-    if quest[user_id] == true then
+    if quest[user_id] then
       if #(GetEntityCoords(GetPlayerPed(source)) - vector3(trfConfig.position[1],trfConfig.position[2],trfConfig.position[3])) <= 1.5 then
           local a = vRP.getInventoryItemAmount{user_id,trfConfig.itemCod} or 0
           if vRP.tryGetInventoryItem{user_id, trfConfig.itemCod, a, true} then
@@ -48,7 +48,7 @@ RegisterCommand(trfConfig.comandaPack,function(source)
 end)
 RegisterCommand(trfConfig.comandaCollect,function(source)
     local user_id = vRP.getUserId{source}
-    if quest[user_id] == true then
+    if quest[user_id] then
       if #(GetEntityCoords(GetPlayerPed(source)) - vector3(trfConfig.position[1],trfConfig.position[2],trfConfig.position[3])) <= 1.5 then
           if bomboane[user_id]>= 100 then
               exports.ghmattimysql:execute("UPDATE vrp_users SET bomboanepack = @a WHERE id = @user_id", {a = 0, user_id = user_id}, function()end)
@@ -67,7 +67,7 @@ timeout = {}
 function vRPStrf.primesteReward()
   local user_id = vRP.getUserId{source}
   local new_weight = vRP.getInventoryWeight{user_id}+vRP.getItemWeight{trfConfig.itemCod}
-  if(timeout[user_id] ~= true)then
+  if not timeout[user_id] then
     timeout[user_id] = true
     if new_weight <= vRP.getInventoryMaxWeight{user_id} then
       vRP.giveInventoryItem{user_id,trfConfig.itemCod,trfConfig.rewardBomboane,true}
@@ -80,7 +80,7 @@ function vRPStrf.primesteReward()
   end
 end
 AddEventHandler('vRP:playerLeave',function(user_id)
-  if quest[user_id] == true then
+  if quest[user_id] then
     quest[user_id] = false
   end
 end)
